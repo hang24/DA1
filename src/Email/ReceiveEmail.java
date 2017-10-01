@@ -124,15 +124,17 @@ public class ReceiveEmail extends JFrame implements ActionListener{
 		DefaultListModel<String> model = new DefaultListModel<>();
 		if(o.equals(btnReceive)) {
 			try{
-				user=txtTenMailForm.getText().trim();
 				password=txtPassword.getText().trim();
 				if(rbtnGoogle.isSelected()) {
+					user=txtTenMailForm.getText().trim()+"@gmail.com";
 					   host="pop.gmail.com";
 				   }
 				else if(rbtnYahoo.isSelected()) {
+					user=txtTenMailForm.getText().trim();
 					   host="pop.mail.yahoo.com";
 				   }
 				else if(rbtnHotMail.isSelected()) {
+					user=txtTenMailForm.getText().trim()+"@hotmail.com";
 					   host="pop3.live.com";
 				   }
 		      }catch(Exception ex){

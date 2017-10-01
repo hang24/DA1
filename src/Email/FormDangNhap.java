@@ -149,6 +149,7 @@ public class FormDangNhap extends JFrame implements ActionListener{
 		txtSubject.setText("");
 		txtText.setText("");
 		txtMess.setText("");
+		txtFile.setText("");
 	}
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -163,17 +164,19 @@ public class FormDangNhap extends JFrame implements ActionListener{
 		   int port = 0;
 		if(o.equals(btnSend)) {
 			try{
-				from=txtTenMailForm.getText().trim();
 				pass=txtPassword.getText().trim();
 				if(rbtnGoogle.isSelected()) {
+					from=txtTenMailForm.getText().trim()+"@gmail.com";
 					   host="smtp.gmail.com";
 						port=587;
 				   }
 				else if(rbtnYahoo.isSelected()) {
+					from=txtTenMailForm.getText().trim();
 					   host="smtp.mail.yahoo.com";
 						port=587;
 				   }
 				else if(rbtnHotMail.isSelected()) {
+					from=txtTenMailForm.getText().trim()+"@hotmail.com";
 					   host="smtp.live.com";
 						port=587;
 				   }
@@ -304,6 +307,7 @@ public class FormDangNhap extends JFrame implements ActionListener{
 			re.setVisible(true);
 		}
 		else if(o.equals(btnChonfile)) {
+			txtFile.setText("");
 			fileChooser.setMultiSelectionEnabled(false);
 			action= fileChooser.showOpenDialog(this);
 			if (action == JFileChooser.APPROVE_OPTION) {
