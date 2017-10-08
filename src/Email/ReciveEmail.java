@@ -7,14 +7,25 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.util.Properties;
 
+import javax.mail.Address;
+import javax.mail.BodyPart;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
+import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.internet.MimeBodyPart;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
@@ -31,16 +42,17 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 
 
-public class ReceiveEmail extends JFrame implements ActionListener{
+public class ReciveEmail extends JFrame implements ActionListener{
 	private JLabel lblTitle, lblTenMailForm, lblPassword, lblNoiDung;
 	private JTextField txtTenMailForm, txtMess;
 	private JList ListNoiDung;
 	private JPasswordField txtPassword;
 	private JButton btnCancel,btnReceive,btnXoaRong;
 	private JRadioButton rbtnGoogle, rbtnYahoo, rbtnHotMail;
-	public ReceiveEmail() {
+	private String saveDirectory = "D:/DAA";
+	public ReciveEmail() {
 		// TODO Auto-generated constructor stub
-		setTitle("Receive Email");
+		setTitle("Recive Email");
 		setSize(1000, 700);
 		setLocationRelativeTo(null);
 		setResizable(false);
@@ -101,7 +113,7 @@ public class ReceiveEmail extends JFrame implements ActionListener{
 		JPanel pSouth =new JPanel();
 		pSouth.add(btnReceive= new JButton("Xem thư"));
 		pSouth.add(btnXoaRong= new JButton("Xóa rổng"));
-		pSouth.add(btnCancel = new JButton("Cancel"));
+		pSouth.add(btnCancel = new JButton("Exit"));
 		add(pSouth,BorderLayout.SOUTH);
 		btnReceive.addActionListener(this);
 		btnXoaRong.addActionListener(this);
@@ -114,6 +126,8 @@ public class ReceiveEmail extends JFrame implements ActionListener{
 		txtPassword.setText("");
 		txtMess.setText("");
 	}
+	
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
@@ -161,16 +175,56 @@ public class ReceiveEmail extends JFrame implements ActionListener{
 
 			      // retrieve the messages from the folder in an array and print it
 			      Message[] messages = emailFolder.getMessages();
-
-			      for (int i = 0, n = messages.length; i < n; i++) {
-			          Message message = messages[i];
-			          model.addElement("---------------------------------");
-			          model.addElement("Email Number " + (i + 1));
-			          model.addElement("From: " + message.getFrom()[0]);
-			          model.addElement("Subject: " + message.getSubject());
-			          model.addElement("Time: " + message.getSentDate());
-			          model.addElement("Text: " + message.getContent().toString());
-			       }
+			      
+			      	for (int i = 0, n = messages.length; i < n; i++) {
+			      		Message message = messages[i];
+					    Address[] fromAddress = message.getFrom();
+				        String from = fromAddress[0].toString();
+				        String subject = message.getSubject();
+				        String sentDate = message.getSentDate().toString();
+				 
+				        String contentType = message.getContentType();
+				        String messageContent = "";
+				                
+				        String attachFiles = "";
+			        	  
+				        if (contentType.contains("multipart")) {
+			        	  Multipart multiPart = (Multipart) message.getContent();
+			        	  int numberOfParts = multiPart.getCount();
+		                    for (int partCount = 0; partCount < numberOfParts; partCount++) {
+		                        MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(partCount);
+		                        if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
+		                            // this part is attachment
+		                            String fileName = part.getFileName();
+		                            attachFiles += fileName + ", ";
+		                            part.saveFile(saveDirectory + File.separator + fileName);
+		                        } else {
+		                            // this part may be the message content
+		                            messageContent = part.getContent().toString();
+		                        }
+		                    }
+		 
+		                    if (attachFiles.length() > 1) {
+		                        attachFiles = attachFiles.substring(0, attachFiles.length() - 2);
+		                    }
+		                } else if (contentType.contains("text/plain") || contentType.contains("text/html")) {
+		                    Object content = message.getContent();
+		                    if (content != null) {
+		                        messageContent = content.toString();
+		                    }
+		                }
+				        model.addElement("---------------------------------");
+				        model.addElement("Email Number " + (i + 1) + ":");
+				        model.addElement("	From: " + from);
+				        model.addElement("	Subject: " + subject);
+				        model.addElement("	Sent Date: " + sentDate);
+				        model.addElement("	Message: " + messageContent);
+				        if(!attachFiles.equals("")) {
+				        	model.addElement("	File đính kèm : " + attachFiles);
+				        	model.addElement("	File được lưu ở D:\\DAA");
+				        }
+			           
+			      }
 			      ListNoiDung.setModel(model);
 			      
 			      //close the store and folder objects
@@ -178,13 +232,13 @@ public class ReceiveEmail extends JFrame implements ActionListener{
 			      store.close();
 
 			      } catch (NoSuchProviderException n) {
-			    	  txtMess.setText("Nhận email thành công");
+			    	  txtMess.setText("Máy chủ email không tồn tại!");
 			         n.printStackTrace();
 			      } catch (MessagingException m) {
-			    	  txtMess.setText("Error!!");
+			    	  txtMess.setText("Địa chỉ email hoặc mật khẫu sai! ");
 			         m.printStackTrace();
 			      } catch (Exception ex) {
-			    	  txtMess.setText("Error!!");
+			    	  txtMess.setText("Error!");
 			         ex.printStackTrace();
 			      }
 			}

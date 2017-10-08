@@ -133,7 +133,7 @@ public class FormDangNhap extends JFrame implements ActionListener{
 		pSouth.add(btnSend = new JButton("Send"));
 		pSouth.add(btnXoaRong = new JButton("Soạn email mới"));
 		pSouth.add(btnReceive= new JButton("Nhận Email"));
-		pSouth.add(btnCancel = new JButton("Cancel"));
+		pSouth.add(btnCancel = new JButton("Exit"));
 		add(pSouth,BorderLayout.SOUTH);
 		btnChonfile.addActionListener(this);
 		btnXoaRong.addActionListener(this);
@@ -164,6 +164,7 @@ public class FormDangNhap extends JFrame implements ActionListener{
 		   int port = 0;
 		if(o.equals(btnSend)) {
 			try{
+				
 				pass=txtPassword.getText().trim();
 				if(rbtnGoogle.isSelected()) {
 					from=txtTenMailForm.getText().trim()+"@gmail.com";
@@ -197,7 +198,6 @@ public class FormDangNhap extends JFrame implements ActionListener{
 
 			   // Get the default Session object.
 			   Session session = Session.getDefaultInstance(properties);
-			   
 			   if(txtFile.getText().trim().equals("")) {
 				   try{
 					      // Create a default MimeMessage object.
@@ -221,12 +221,12 @@ public class FormDangNhap extends JFrame implements ActionListener{
 					      transport.connect(host, from, pass);
 					      transport.sendMessage(message, message.getAllRecipients());
 					      transport.close();
-					      txtMess.setText("Gửi email thành công");
+					      txtMess.setText("Gửi email thành công!");
 					   } catch (AddressException ae) {
-						   txtMess.setText("Gửi email thất bại");
+						   txtMess.setText("Gửi email thất bại!");
 							ae.printStackTrace();
 					   }catch (MessagingException mex) {
-						   txtMess.setText("Gửi email thất bại");
+						   txtMess.setText("Gửi email thất bại!");
 					      mex.printStackTrace();
 					      
 					
@@ -278,12 +278,12 @@ public class FormDangNhap extends JFrame implements ActionListener{
 			      transport.connect(host, from, pass);
 			      transport.sendMessage(message, message.getAllRecipients());
 			      transport.close();
-			      txtMess.setText("Gửi email thành công");
+			      txtMess.setText("Gửi email thành công!");
 			   } catch (AddressException ae) {
-				   txtMess.setText("Gửi email thất bại");
+				   txtMess.setText("Gửi email thất bại!");
 					ae.printStackTrace();
 			   }catch (MessagingException mex) {
-				   txtMess.setText("Gửi email thất bại");
+				   txtMess.setText("Địa chỉ email hoặc mật khẩu của bạn sai!");
 			      mex.printStackTrace();
 			      
 			
@@ -303,18 +303,15 @@ public class FormDangNhap extends JFrame implements ActionListener{
 			XoaRong();
 		}
 		else if(o.equals(btnReceive)) {
-			ReceiveEmail re= new ReceiveEmail();
+			ReciveEmail re= new ReciveEmail();
 			re.setVisible(true);
 		}
 		else if(o.equals(btnChonfile)) {
-			txtFile.setText("");
 			fileChooser.setMultiSelectionEnabled(false);
 			action= fileChooser.showOpenDialog(this);
 			if (action == JFileChooser.APPROVE_OPTION) {
+				txtFile.setText("");
 	            txtFile.append(fileChooser.getSelectedFile().getName());
-	        } 
-			else {
-	        	txtFile.append("You cancelled open!");
 	        }
 			
 		}
