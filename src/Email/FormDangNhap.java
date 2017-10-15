@@ -29,10 +29,12 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+
 
 import java.util.*;
 
@@ -51,21 +53,32 @@ public class FormDangNhap extends JFrame implements ActionListener{
 	private JRadioButton rbtnGoogle, rbtnYahoo, rbtnHotMail;
 	private File filename;
 	private int action;
-	JFileChooser fileChooser= new JFileChooser();
+	private JFileChooser fileChooser= new JFileChooser();
+	private JPanel pPanel1;
 	public FormDangNhap() {
 		// TODO Auto-generated constructor stub
-		setTitle("Send Email");
+		setTitle("Send/Receive Email");
 		setSize(1000, 700);
 		setLocationRelativeTo(null);
 		setResizable(false);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		JPanel topPanel =new JPanel();
+		topPanel.setLayout(new BorderLayout());
+		getContentPane().add(topPanel);
 		UIChonDangNhap();
+		ReceiveEmail receiveEmail= new ReceiveEmail();
+		JTabbedPane tabbedPane = new JTabbedPane();
+		tabbedPane.addTab("Send Email", pPanel1);
+		tabbedPane.addTab("Receive Email", receiveEmail.pPanel2);
+		topPanel.add( tabbedPane, BorderLayout.CENTER );
 		
 		
 	}
 	
 	private void UIChonDangNhap() {
 		// TODO Auto-generated method stub
+		pPanel1= new JPanel();
+		pPanel1.setLayout(new BorderLayout());
 		JPanel pNorth =new JPanel();
 		pNorth.add(lblTitle=new JLabel("Gửi Email"));
 		Font fp= new Font("Time New Roman",Font.BOLD,30);
@@ -97,7 +110,7 @@ public class FormDangNhap extends JFrame implements ActionListener{
 		txtPassword.setBounds(x2, 190, width2, height);
 		pNorth.setPreferredSize(new Dimension(0,220));
 		pNorth.setLayout(null);
-		add(pNorth,BorderLayout.NORTH);
+		pPanel1.add(pNorth,BorderLayout.NORTH);
 		
 		JPanel pCen= new JPanel();
 		pCen.add(lblTo= new JLabel("Tới:"));
@@ -127,17 +140,15 @@ public class FormDangNhap extends JFrame implements ActionListener{
 		txtMess.setBounds(300, 320, 300, 30);
 	    pCen.setPreferredSize(new Dimension(0,400));
 		pCen.setLayout(null);
-		add(pCen,BorderLayout.CENTER);
+		pPanel1.add(pCen,BorderLayout.CENTER);
 		
 		JPanel pSouth =new JPanel();
 		pSouth.add(btnSend = new JButton("Send"));
 		pSouth.add(btnXoaRong = new JButton("Soạn email mới"));
-		pSouth.add(btnReceive= new JButton("Nhận Email"));
 		pSouth.add(btnCancel = new JButton("Exit"));
-		add(pSouth,BorderLayout.SOUTH);
+		pPanel1.add(pSouth,BorderLayout.SOUTH);
 		btnChonfile.addActionListener(this);
 		btnXoaRong.addActionListener(this);
-		btnReceive.addActionListener(this);
 		btnSend.addActionListener(this);
 		btnCancel.addActionListener(this);
 	}
@@ -221,12 +232,12 @@ public class FormDangNhap extends JFrame implements ActionListener{
 					      transport.connect(host, from, pass);
 					      transport.sendMessage(message, message.getAllRecipients());
 					      transport.close();
-					      txtMess.setText("Gửi email thành công!");
+					      txtMess.setText("Gửi email thành công");
 					   } catch (AddressException ae) {
-						   txtMess.setText("Gửi email thất bại!");
+						   txtMess.setText("Gửi email thất bại");
 							ae.printStackTrace();
 					   }catch (MessagingException mex) {
-						   txtMess.setText("Gửi email thất bại!");
+						   txtMess.setText("Gửi email thất bại");
 					      mex.printStackTrace();
 					      
 					
@@ -278,9 +289,9 @@ public class FormDangNhap extends JFrame implements ActionListener{
 			      transport.connect(host, from, pass);
 			      transport.sendMessage(message, message.getAllRecipients());
 			      transport.close();
-			      txtMess.setText("Gửi email thành công!");
+			      txtMess.setText("Gửi email thành công");
 			   } catch (AddressException ae) {
-				   txtMess.setText("Gửi email thất bại!");
+				   txtMess.setText("Gửi email thất bại");
 					ae.printStackTrace();
 			   }catch (MessagingException mex) {
 				   txtMess.setText("Địa chỉ email hoặc mật khẩu của bạn sai!");
@@ -301,10 +312,6 @@ public class FormDangNhap extends JFrame implements ActionListener{
 		}
 		else if(o.equals(btnXoaRong)) {
 			XoaRong();
-		}
-		else if(o.equals(btnReceive)) {
-			ReciveEmail re= new ReciveEmail();
-			re.setVisible(true);
 		}
 		else if(o.equals(btnChonfile)) {
 			fileChooser.setMultiSelectionEnabled(false);
