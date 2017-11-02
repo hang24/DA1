@@ -1,4 +1,4 @@
-package Email;
+package email;
 
 
 import java.awt.BorderLayout;
@@ -7,16 +7,11 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
+import java.io.IOException;
 import java.util.Properties;
 
 import javax.mail.Address;
-import javax.mail.BodyPart;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -39,21 +34,22 @@ import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.ScrollPaneConstants;
+
 
 
 public class ReceiveEmail extends JFrame implements ActionListener{
-	private JLabel lblTitle, lblTenMailForm, lblPassword;
+	private JLabel lblTitle, lblTenMailForm, lblPassword, lblNoiDung;
 	private JTextField txtTenMailForm, txtMess;
 	private JList ListNoiDung;
 	private JPasswordField txtPassword;
 	private JButton btnCancel,btnReceive,btnXoaRong;
 	private JRadioButton rbtnGoogle, rbtnYahoo, rbtnHotMail;
-	private DefaultListModel<String> model = new DefaultListModel<>();
 	private String saveDirectory = "D:/DAA";
 	public JPanel pPanel2;
+	DefaultListModel<String> model = new DefaultListModel<>();
 	public ReceiveEmail() {
 		// TODO Auto-generated constructor stub
+		setTitle("Receive Email");
 		setSize(1000, 700);
 		setLocationRelativeTo(null);
 		setResizable(false);
@@ -61,7 +57,7 @@ public class ReceiveEmail extends JFrame implements ActionListener{
 		UIReceiveEmail();
 	}
 	
-	private void UIReceiveEmail() {
+	public void UIReceiveEmail() {
 		// TODO Auto-generated method stub
 		pPanel2 =new JPanel();
 		pPanel2.setLayout(new BorderLayout());
@@ -71,7 +67,7 @@ public class ReceiveEmail extends JFrame implements ActionListener{
 		lblTitle.setFont(fp);
 		lblTitle.setForeground(Color.BLUE);
 		lblTitle.setBounds(350, 10 ,400 , 40);
-		
+
 		pNorth.add(rbtnGoogle = new JRadioButton("Đăng nhập bằng Google"));
 		rbtnGoogle.setBounds(300, 70, 300, 30);
 		pNorth.add(rbtnYahoo =new JRadioButton ("Đăng Nhập bằng Yahoo"));
@@ -80,16 +76,16 @@ public class ReceiveEmail extends JFrame implements ActionListener{
 		rbtnHotMail.setBounds(300, 130, 300, 30);
 		// chọn 1 trong nhiều
 		ButtonGroup group = new ButtonGroup();
-	       group.add (rbtnGoogle);
-	       group.add (rbtnYahoo);
-	       group.add (rbtnHotMail);
-		
+		   group.add (rbtnGoogle);
+		   group.add (rbtnYahoo);
+		   group.add (rbtnHotMail);
+
 		int x= 200,x2=300, width =100, width2=300,height=25;
 		pNorth.add(lblTenMailForm= new JLabel("Địa chỉ Email:"));
 		lblTenMailForm.setBounds(x, 160, width, height);
 		pNorth.add(lblPassword = new JLabel("Mật Khẩu:"));
 		lblPassword.setBounds(x, 190,width, height);
-		
+
 		pNorth.add(txtTenMailForm = new JTextField());
 		txtTenMailForm.setBounds(x2, 160, width2, height);
 		pNorth.add(txtPassword = new JPasswordField());
@@ -103,7 +99,7 @@ public class ReceiveEmail extends JFrame implements ActionListener{
 		pNorth.setPreferredSize(new Dimension(0,270));
 		pNorth.setLayout(null);
 		pPanel2.add(pNorth,BorderLayout.NORTH);
-		
+
 		String[] noidung= {" ---------------------------------------Nội dung nhận được là: --------------------------------------"};
 		ListNoiDung= new JList(noidung);
 		ListNoiDung.setVisibleRowCount(13);
@@ -112,11 +108,11 @@ public class ReceiveEmail extends JFrame implements ActionListener{
 		pCen.setBorder(BorderFactory.createTitledBorder("Nội dung nhận:"));
 		pCen.add(listPane);
 		pPanel2.add(pCen,BorderLayout.CENTER);
-		
+
 		JPanel pSouth =new JPanel();
 		pSouth.add(btnReceive= new JButton("Xem thư"));
 		pSouth.add(btnXoaRong= new JButton("Xóa rổng"));
-		pSouth.add(btnCancel = new JButton("Exit"));
+		pSouth.add(btnCancel = new JButton("Thoát"));
 		pPanel2.add(pSouth,BorderLayout.SOUTH);
 		btnReceive.addActionListener(this);
 		btnXoaRong.addActionListener(this);
@@ -129,11 +125,46 @@ public class ReceiveEmail extends JFrame implements ActionListener{
 		txtPassword.setText("");
 		txtMess.setText("");
 		model.clear();
-		model.addElement(" ---------------------------------------Nội dung nhận được là : --------------------------------------");
 		ListNoiDung.setModel(model);
-		
 	}
-	
+	private String getText(Part p) throws MessagingException, IOException {
+		boolean textIsHtml = false;
+		if (p.isMimeType("text/*")) {
+			String s = (String)p.getContent();
+			textIsHtml = p.isMimeType("text/html");
+			return s;
+		}
+
+		if (p.isMimeType("multipart/alternative")) {
+		// prefer html text over plain text
+		Multipart mp = (Multipart)p.getContent();
+		String text = null;
+		for (int i = 0; i < mp.getCount(); i++) {
+		    Part bp = mp.getBodyPart(i);
+		    if (bp.isMimeType("text/plain")) {
+		        if (text == null)
+		            text = getText(bp);
+		        continue;
+		    } else if (bp.isMimeType("text/html")) {
+		        String s = getText(bp);
+		        if (s != null)
+		            return s;
+		    } else {
+		        return getText(bp);
+		    }
+		}
+		return text;
+		} else if (p.isMimeType("multipart/*")) {
+		Multipart mp = (Multipart)p.getContent();
+		for (int i = 0; i < mp.getCount(); i++) {
+		    String s = getText(mp.getBodyPart(i));
+		    if (s != null)
+		        return s;
+		}
+		}
+		
+		return null;
+	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -151,7 +182,7 @@ public class ReceiveEmail extends JFrame implements ActionListener{
 					   host="pop.gmail.com";
 				   }
 				else if(rbtnYahoo.isSelected()) {
-					user=txtTenMailForm.getText().trim();
+					user=txtTenMailForm.getText().trim()+"@yahoo.com";
 					   host="pop.mail.yahoo.com";
 				   }
 				else if(rbtnHotMail.isSelected()) {
@@ -194,8 +225,9 @@ public class ReceiveEmail extends JFrame implements ActionListener{
 				        String messageContent = "";
 				                
 				        String attachFiles = "";
-			        	  
+			        	messageContent=getText(message);
 				        if (contentType.contains("multipart")) {
+				        	
 			        	  Multipart multiPart = (Multipart) message.getContent();
 			        	  int numberOfParts = multiPart.getCount();
 		                    for (int partCount = 0; partCount < numberOfParts; partCount++) {
@@ -205,59 +237,91 @@ public class ReceiveEmail extends JFrame implements ActionListener{
 		                            String fileName = part.getFileName();
 		                            attachFiles += fileName + ", ";
 		                            part.saveFile(saveDirectory + File.separator + fileName);
-		                        } else {
-		                            // this part may be the message content
-		                            messageContent = part.getContent().toString();
+		                            
 		                        }
 		                    }
 		 
 		                    if (attachFiles.length() > 1) {
 		                        attachFiles = attachFiles.substring(0, attachFiles.length() - 2);
 		                    }
+		                   
 		                } else if (contentType.contains("text/plain") || contentType.contains("text/html")) {
 		                    Object content = message.getContent();
 		                    if (content != null) {
 		                        messageContent = content.toString();
 		                    }
 		                }
-				        txtMess.setText("");
 				        
-				       // model.addElement(" ---------------------------------------Nội dung nhận được là : --------------------------------------");
+				        StringBuilder tu = new StringBuilder(from);
+				        int xoadu1=tu.indexOf("<");
+				        if(xoadu1>=0) {
+				        	tu.delete(0,xoadu1+1);
+				        }
+				        int xoadu2=tu.indexOf(">");
+				        if(xoadu2 >1) {
+				        	tu.delete(xoadu2, tu.length());
+				        }
+				        StringBuilder text = new StringBuilder(messageContent.trim());
+				        if(!messageContent.trim().equals("")) {
+				        	
+				        	int xoadu3=text.indexOf(">");
+				        	if(xoadu3>=0) {
+				        		text.delete(0,xoadu3+1);
+				        	}
+				        	int xoadu4=text.indexOf("<");
+				        	if(xoadu4>1) {
+				        		text.delete(xoadu4, text.length());
+				        	}
+				        }
+				        StringBuilder text1 = new StringBuilder(text);
+				        if(!messageContent.trim().equals("")) {
+				        	
+				        	int xoadu5=text1.indexOf(">");
+				        	if(xoadu5>=0) {
+				        		text1.delete(0,xoadu5+1);
+				        	}
+				        	int xoadu6=text1.indexOf("<");
+				        	if(xoadu6>1) {
+				        		text1.delete(xoadu6, text1.length());
+				        	}
+				        }
+				        model.addElement("---------------------------------");
 				        model.addElement("Email Number " + (i + 1) + ":");
-				        model.addElement("From: " + from);
+				        model.addElement("From: " + tu);
 				        model.addElement("Subject: " + subject);
 				        model.addElement("Time: " + sentDate);
-				        model.addElement("Text: " + messageContent);
+				        model.addElement("Text: " + text1);
 				        if(!attachFiles.equals("")) {
 				        	model.addElement("Tên File: " + attachFiles);
-				        	model.addElement("File của bạn được lưu ở D:/DAA");
 				        }
-				        model.addElement("-----------------------------------------");
-				        
+			           
 			      }
 			      	txtMess.setText("");
 			      	if(from.equals("")) {
 			        	txtMess.setText("Email của bạn rỗng!");
-			        	model.addElement(" -------------------------------------------- Không có thư mới! -----------------------------------------");
+			        	model.addElement(" -------------------------------------------- Không có thư ! -----------------------------------------");
 			        }
-			      		ListNoiDung.setModel(model);
+			      ListNoiDung.setModel(model);
+			      
 			      //close the store and folder objects
 			      emailFolder.close(false);
 			      store.close();
 
 			      } catch (NoSuchProviderException n) {
-			    	  txtMess.setText("Gửi email thất bại!!");
+			    	  txtMess.setText("Máy chủ email không tồn tại!");
 			         n.printStackTrace();
 			      } catch (MessagingException m) {
-			    	  txtMess.setText("Địa chỉ email hoặc mật khẩu sai! ");
+			    	  txtMess.setText("Địa chỉ email hoặc mật khẫu sai! ");
 			         m.printStackTrace();
 			      } catch (Exception ex) {
-			    	  txtMess.setText("Gửi email thất bại!");
+			    	  txtMess.setText("Error!!");
 			         ex.printStackTrace();
 			      }
 			}
 		else if(o.equals(btnXoaRong)){
 			XoaRong();
+			model.addElement("---------------------------------------Nội dung nhận được là: --------------------------------------");
+			ListNoiDung.setModel(model);
 		}
 		else if(o.equals(btnCancel)) {
 			int cancel= JOptionPane.showConfirmDialog(this, "Bạn có chắc muốn thoát không?","Thoát ứng dụng",JOptionPane.YES_NO_OPTION);

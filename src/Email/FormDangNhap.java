@@ -1,4 +1,4 @@
-package Email;
+package email;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -6,10 +6,10 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
 import java.io.File;
-import java.io.FileFilter;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -18,7 +18,6 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -28,15 +27,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.DefaultTableModel;
-
-
-import java.util.*;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -57,7 +52,7 @@ public class FormDangNhap extends JFrame implements ActionListener{
 	private JPanel pPanel1;
 	public FormDangNhap() {
 		// TODO Auto-generated constructor stub
-		setTitle("Send/Receive Email");
+		setTitle("Phần mềm Send/Receive Email");
 		setSize(1000, 700);
 		setLocationRelativeTo(null);
 		setResizable(false);
@@ -66,7 +61,7 @@ public class FormDangNhap extends JFrame implements ActionListener{
 		topPanel.setLayout(new BorderLayout());
 		getContentPane().add(topPanel);
 		UIChonDangNhap();
-		ReceiveEmail receiveEmail= new ReceiveEmail();
+		email.ReceiveEmail receiveEmail= new email.ReceiveEmail();
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.addTab("Send Email", pPanel1);
 		tabbedPane.addTab("Receive Email", receiveEmail.pPanel2);
@@ -143,9 +138,9 @@ public class FormDangNhap extends JFrame implements ActionListener{
 		pPanel1.add(pCen,BorderLayout.CENTER);
 		
 		JPanel pSouth =new JPanel();
-		pSouth.add(btnSend = new JButton("Send"));
+		pSouth.add(btnSend = new JButton("Gửi"));
 		pSouth.add(btnXoaRong = new JButton("Soạn email mới"));
-		pSouth.add(btnCancel = new JButton("Exit"));
+		pSouth.add(btnCancel = new JButton("Thoát"));
 		pPanel1.add(pSouth,BorderLayout.SOUTH);
 		btnChonfile.addActionListener(this);
 		btnXoaRong.addActionListener(this);
@@ -154,13 +149,11 @@ public class FormDangNhap extends JFrame implements ActionListener{
 	}
 
 	private void XoaRong() {
-		txtTenMailForm.setText("");
-		txtPassword.setText("");
 		txtTenMailTo.setText("");
 		txtSubject.setText("");
 		txtText.setText("");
-		txtMess.setText("");
 		txtFile.setText("");
+		txtMess.setText("");
 	}
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -183,7 +176,7 @@ public class FormDangNhap extends JFrame implements ActionListener{
 						port=587;
 				   }
 				else if(rbtnYahoo.isSelected()) {
-					from=txtTenMailForm.getText().trim();
+					from=txtTenMailForm.getText().trim()+"@yahoo.com";
 					   host="smtp.mail.yahoo.com";
 						port=587;
 				   }
@@ -232,12 +225,16 @@ public class FormDangNhap extends JFrame implements ActionListener{
 					      transport.connect(host, from, pass);
 					      transport.sendMessage(message, message.getAllRecipients());
 					      transport.close();
-					      txtMess.setText("Gửi email thành công");
+					      JOptionPane.showMessageDialog(null, "Gửi email thành công",
+				                  "Thông Báo", JOptionPane.INFORMATION_MESSAGE);
+					      XoaRong();
 					   } catch (AddressException ae) {
-						   txtMess.setText("Gửi email thất bại");
+						   JOptionPane.showMessageDialog(null, "Gửi email thất bại",
+					                  "Thông Báo", JOptionPane.ERROR_MESSAGE);
 							ae.printStackTrace();
 					   }catch (MessagingException mex) {
-						   txtMess.setText("Gửi email thất bại");
+						   JOptionPane.showMessageDialog(null, "Địa chỉ email hoặc mật khẫu của bạn sai!",
+					                  "Thông Báo", JOptionPane.ERROR_MESSAGE);
 					      mex.printStackTrace();
 					      
 					
@@ -289,16 +286,20 @@ public class FormDangNhap extends JFrame implements ActionListener{
 			      transport.connect(host, from, pass);
 			      transport.sendMessage(message, message.getAllRecipients());
 			      transport.close();
-			      txtMess.setText("Gửi email thành công");
+			      JOptionPane.showMessageDialog(null, "Gửi email thành công",
+		                  "Thông Báo", JOptionPane.INFORMATION_MESSAGE);
+			      XoaRong();
 			   } catch (AddressException ae) {
-				   txtMess.setText("Gửi email thất bại");
+				   JOptionPane.showMessageDialog(null, "Gửi email thất bại",
+			                  "Thông Báo", JOptionPane.ERROR_MESSAGE);
 					ae.printStackTrace();
 			   }catch (MessagingException mex) {
-				   txtMess.setText("Địa chỉ email hoặc mật khẩu của bạn sai!");
+				   JOptionPane.showMessageDialog(null, "Địa chỉ email hoặc mật khẫu của bạn sai!",
+			                  "Thông Báo", JOptionPane.ERROR_MESSAGE);
 			      mex.printStackTrace();
 			      
 			
-			   }
+			  }
 			   }
 
 		}
@@ -311,6 +312,8 @@ public class FormDangNhap extends JFrame implements ActionListener{
 			
 		}
 		else if(o.equals(btnXoaRong)) {
+			txtTenMailForm.setText("");
+			txtPassword.setText("");
 			XoaRong();
 		}
 		else if(o.equals(btnChonfile)) {
@@ -327,6 +330,17 @@ public class FormDangNhap extends JFrame implements ActionListener{
 	}
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			} catch (ClassNotFoundException ex) {
+			Logger.getLogger(FormDangNhap.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (InstantiationException ex) {
+			Logger.getLogger(FormDangNhap.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (IllegalAccessException ex) {
+			Logger.getLogger(FormDangNhap.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (UnsupportedLookAndFeelException ex) {
+			Logger.getLogger(FormDangNhap.class.getName()).log(Level.SEVERE, null, ex);
+			}
 		FormDangNhap frm = new FormDangNhap();
 		frm.setVisible(true);
 	}
